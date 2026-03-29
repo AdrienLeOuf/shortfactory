@@ -50,3 +50,5 @@ services:
         value: "pad"
       - key: TIKTOK_UNAUDITED_DEFAULT
         value: "1"
+      - key: SHORTFACTORY_MANUAL_TIKTOK
+        value: "1"
