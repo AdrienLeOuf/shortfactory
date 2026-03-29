@@ -554,7 +554,7 @@ async function checkBackend() {
     const r = await fetch(`${API}/api/oauth/status`);
     const d = await r.json();
     S.backendOk = true;
-    S.tiktokApiReady = !!d.tiktok?.ready;
+    S.tiktokApiReady = d.tiktok.publishViaApi !== undefined ? !!d.tiktok.publishViaApi : !!d.tiktok?.ready;
     const el = document.getElementById('hBack');
     if (S.tiktokApiReady) {
       el.textContent = 'Prêt ✓ (publication API)';

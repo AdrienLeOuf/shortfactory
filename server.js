@@ -188,7 +188,18 @@ app.get('/api/tiktok/setup', (req, res) => {
 });
 
 app.get('/api/oauth/status', (req, res) => {
-  res.json({ tiktok: { ready: !!(OAUTH.tiktok.clientKey && OAUTH.tiktok.clientSecret), redirectUri: OAUTH.tiktok.redirectUri } });
+  const hasKeys = !!(OAUTH.tiktok.clientKey && OAUTH.tiktok.clientSecret);
+  const manualUi = ['1', 'true', 'yes', 'on', 'manual'].includes(
+    String(process.env.SHORTFACTORY_MANUAL_TIKTOK ?? '').trim().toLowerCase()
+  );
+  res.json({
+    tiktok: {
+      ready: hasKeys,
+      /** false si SHORTFACTORY_MANUAL_TIKTOK=1 : UI MP4 seulement, même avec clés en .env */
+      publishViaApi: hasKeys && !manualUi,
+      redirectUri: OAUTH.tiktok.redirectUri,
+    },
+  });
 });
 
 app.get('/api/oauth/accounts', (req, res) => {
