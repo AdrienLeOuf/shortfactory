@@ -161,6 +161,8 @@ select{background:var(--bg2);border:1px solid var(--b2);border-radius:8px;paddin
   cursor:pointer;transition:opacity .2s}
 .spubbtn:hover{opacity:.85}
 .spubbtn:disabled{opacity:.4;cursor:not-allowed}
+.spub-hint{display:block;width:100%;padding:9px 10px;border-radius:0 0 9px 9px;background:rgba(0,201,255,.08);border-top:1px solid var(--border);
+  color:var(--t2);font-size:10px;line-height:1.45;font-weight:600;text-align:center}
 
 /* ── PUBLISH BAR ─────────────────────────────────────── */
 #pubBar{display:none;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px 12px;animation:fup .4s}
@@ -269,7 +271,7 @@ select{background:var(--bg2);border:1px solid var(--b2);border-radius:8px;paddin
   <div class="hpills">
     <div class="hpill hp1">⚡ Premier short ~30s</div>
     <div class="hpill hp2">🎬 Streaming progressif</div>
-    <div class="hpill hp3">📤 TikTok Direct Post</div>
+    <div class="hpill hp3">📥 MP4 → TikTok (import manuel ou API)</div>
   </div>
   <div class="hstatus">
     <div class="dot"></div>
@@ -443,7 +445,7 @@ select{background:var(--bg2);border:1px solid var(--b2);border-radius:8px;paddin
         <!-- TikTok -->
         <div class="apanel on" id="panel-tt">
           <div class="alist" id="alist-tt"></div>
-          <button class="addbtn" onclick="openModal('tt')">+ Connecter un compte TikTok</button>
+          <button class="addbtn" onclick="openModal('tt')">+ TikTok · Publication auto (optionnel, clés API)</button>
         </div>
         <!-- Instagram -->
         <div class="apanel" id="panel-ig">
@@ -513,6 +515,7 @@ const S = {
   nets: ['tt'],
   capcutAuto: true,
   capcutSubs: true,
+  tiktokApiReady: false,
   accounts: { tt: [], ig: [], fb: [] },
   pubSel: new Set(),
   currentJob: null,
@@ -551,11 +554,18 @@ async function checkBackend() {
     const r = await fetch(`${API}/api/oauth/status`);
     const d = await r.json();
     S.backendOk = true;
+    S.tiktokApiReady = !!d.tiktok?.ready;
     const el = document.getElementById('hBack');
-    el.textContent = d.tiktok.ready ? 'Prêt ✓' : 'Clés TikTok manquantes';
-    el.style.color = d.tiktok.ready ? 'var(--green)' : 'var(--orange)';
+    if (S.tiktokApiReady) {
+      el.textContent = 'Prêt ✓ (publication API)';
+      el.style.color = 'var(--green)';
+    } else {
+      el.textContent = 'Prêt ✓ génération · MP4 → TikTok à la main';
+      el.style.color = 'var(--a3)';
+    }
   } catch {
     document.getElementById('hBack').textContent = 'Hors ligne';
+    S.tiktokApiReady = false;
   }
 }
 
@@ -759,7 +769,7 @@ function handleWS(msg) {
       if (!S.pubSel.size) initPubSelDefaults();
       renderPublishTargets();
     }
-    notif('🎉','Tous les shorts prêts', S.shorts.length + ' short(s) · clique ⚡ Publier');
+    notif('🎉','Tous les shorts prêts', S.tiktokApiReady ? (S.shorts.length + ' short(s) · ⚡ Publier ou ⬇ MP4') : (S.shorts.length + ' short(s) · ⬇ Télécharge les MP4 → TikTok'));
     updateStats();
   }
 
@@ -796,7 +806,9 @@ function appendShortCard(s) {
     </div>
     <a class="sdl" href="${dl}" download target="_blank" rel="noopener">⬇ Télécharger MP4</a>
     <div class="sinfo"><div class="sdur">⏱ ${fmt(s.duration)} · 1080×1920 H.264</div></div>
-    <button class="spubbtn" onclick="publishOne(${s.id})">⚡ Publier sur TikTok</button>`;
+    ${S.tiktokApiReady
+      ? `<button class="spubbtn" onclick="publishOne(${s.id})">⚡ Publier sur TikTok (API)</button>`
+      : `<div class="spub-hint">📱 Importe ce MP4 dans TikTok : app → <strong>Créer</strong> → <strong>Téléverser</strong>. Pas besoin de connexion ici.</div>`}`;
   grid.appendChild(div);
 }
 
@@ -809,6 +821,9 @@ function renderResults() {
 
 /* ═══ PUBLICATION ═════════════════════════════════════ */
 async function publishOne(id) {
+  if (!S.tiktokApiReady) {
+    return notif('📱','Sans API TikTok','Télécharge le MP4 du short puis importe-le dans l’app TikTok (Créer → Téléverser).');
+  }
   const short = S.shorts.find(s => s.id === id);
   if (!short) return;
   const accIds = getSelectedPublishAccIds();
@@ -821,6 +836,9 @@ async function publishOne(id) {
 }
 
 async function publishAll() {
+  if (!S.tiktokApiReady) {
+    return notif('📱','Sans API TikTok','Utilise ⬇ Télécharger MP4 sur chaque short, puis importe dans TikTok.');
+  }
   if (!S.shorts.length) return;
   const accIds = getSelectedPublishAccIds();
   if (!accIds.length) return notif('⚠️','Compte','Coche un compte TikTok');
@@ -934,7 +952,12 @@ function renderPublishTargets() {
   const cont = document.getElementById('pubTargetsContainer');
   if (!cont) return;
   const netsWithAcc = ['tt','ig','fb'].filter(n => S.accounts[n].length > 0);
-  if (!netsWithAcc.length) { cont.innerHTML = '<div style="font-size:12px;color:var(--t3);padding:6px 0">Aucun compte connecté — connecte TikTok ci-contre</div>'; return; }
+  if (!netsWithAcc.length) {
+    cont.innerHTML = S.tiktokApiReady
+      ? '<div style="font-size:12px;color:var(--t3);padding:6px 0">Aucun compte connecté — ajoute TikTok à droite pour publier via API.</div>'
+      : '<div style="font-size:12px;color:var(--a3);padding:6px 0;line-height:1.45"><strong>Mode simple :</strong> aucun compte requis. Télécharge les MP4 au-dessus puis envoie-les depuis l’app TikTok. La publication automatique (droite) est <em>optionnelle</em> et demande des clés API TikTok.</div>';
+    return;
+  }
   const labels = { tt:'🎵 TikTok', ig:'📸 Instagram', fb:'👥 Facebook' };
   cont.innerHTML = netsWithAcc.map(n => `
     <div class="pub-net-block ${n}">
@@ -988,9 +1011,19 @@ function updateQueue(id, status, detail) {
 /* ═══ MODAL ════════════════════════════════════════════ */
 function openModal(n) {
   const labels = { tt: 'TikTok', ig: 'Instagram', fb: 'Facebook' };
-  document.getElementById('mTitle').textContent = 'Connecter ' + labels[n];
-  document.getElementById('mSub').textContent = 'Autorise ShortFactory à publier pour toi';
+  document.getElementById('mTitle').textContent = n === 'tt' ? 'TikTok' : ('Connecter ' + labels[n]);
   const b = document.getElementById('mBody');
+  if (n === 'tt' && !S.tiktokApiReady) {
+    document.getElementById('mSub').textContent = 'Tu n’as rien à connecter pour créer tes shorts.';
+    b.innerHTML = `<p style="font-size:13px;color:var(--t2);line-height:1.55;margin:0 0 14px">
+      Génère tes clips puis clique <strong>⬇ Télécharger MP4</strong>. Sur ton téléphone, ouvre TikTok → <strong>Créer</strong> → <strong>Téléverser</strong> et choisis le fichier.<br><br>
+      <span style="color:var(--t3);font-size:12px">La publication <em>directe depuis le site</em> (bouton « Publier API ») est une option avancée : il faut alors des clés sur <strong>developers.tiktok.com</strong> et les mettre dans <code>.env</code> / Render.</span>
+    </p>
+    <button class="obtn obtn-tt" type="button" onclick="closeModal()" style="width:100%;justify-content:center"><span>✓</span><span class="olbl">Compris</span></button>`;
+    document.getElementById('modal').classList.add('on');
+    return;
+  }
+  document.getElementById('mSub').textContent = 'Autorise ShortFactory à publier pour toi (API TikTok)';
   if (n === 'tt') {
     b.innerHTML = `<button class="obtn obtn-tt" onclick="window.open('${API}/auth/tiktok','_blank','width=480,height=720')">
       <span>🎵</span><span class="olbl">Continuer avec TikTok</span>
