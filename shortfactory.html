@@ -487,7 +487,23 @@ select{background:var(--bg2);border:1px solid var(--b2);border-radius:8px;paddin
 
 <script>
 /* ═══ CONSTANTES ══════════════════════════════════════ */
-const API = '';
+/** Backend API : vide = même origine (Render ou http://localhost:3000). Sinon cible explicite :3000 si autre port / file:// */
+const API = (() => {
+  const { protocol, hostname, port } = window.location;
+  if (protocol === 'file:') return 'http://localhost:3000';
+  const local = hostname === 'localhost' || hostname === '127.0.0.1';
+  if (local && port && port !== '3000') return `http://${hostname}:3000`;
+  return '';
+})();
+function wsBackendUrl() {
+  if (API) {
+    const u = new URL(API);
+    const s = u.protocol === 'https:' ? 'wss' : 'ws';
+    return `${s}://${u.host}`;
+  }
+  const s = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${s}://${window.location.host}`;
+}
 const COLORS = ['#6c63ff','#ff3d6b','#00c9ff','#00e676','#ff9100','#ffe033'];
 const ACCOUNTS_KEY = 'sf_accounts_v2';
 
@@ -660,7 +676,7 @@ async function startGenerate() {
 /* ═══ WEBSOCKET ════════════════════════════════════════ */
 let ws, wsRetry = 0;
 function initWebSocket() {
-  const wsUrl = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host;
+  const wsUrl = wsBackendUrl();
   ws = new WebSocket(wsUrl);
   ws.onopen = () => { wsRetry = 0; };
   ws.onmessage = ev => { try { handleWS(JSON.parse(ev.data)); } catch(_){} };
