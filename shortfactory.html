@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShortFactory — YouTube → TikTok Shorts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07070f;--bg2:#0d0d1a;--bg3:#121224;--card:#0f0f1e;
+  --border:#1c1c32;--b2:#252545;--b3:#32325a;
+  --accent:#6c63ff;--a2:#ff3d6b;--a3:#00c9ff;
+  --green:#00e676;--orange:#ff9100;--yellow:#ffe033;
+  --tt:#fe2c55;--ig:#e1306c;--fb:#1877f2;
+  --text:#f0f0ff;--t2:#7878aa;--t3:#3d3d60;
+  --grad:linear-gradient(135deg,#6c63ff 0%,#ff3d6b 100%);
+  --glow:0 0 40px rgba(108,99,255,.3);
+  --font-head:'Bricolage Grotesque',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(800px 600px at 10% 10%,rgba(108,99,255,.06) 0%,transparent 70%),
+             radial-gradient(600px 800px at 90% 90%,rgba(255,61,107,.04) 0%,transparent 70%),
+             radial-gradient(400px 400px at 55% 5%,rgba(0,201,255,.03) 0%,transparent 70%);
+  animation:mesh 14s ease-in-out infinite alternate}
+@keyframes mesh{to{transform:scale(1.06) rotate(.8deg);opacity:.9}}
+
+/* ── HEADER ────────────────────────────────────────── */
+header{position:relative;z-index:20;display:flex;align-items:center;gap:16px;padding:13px 32px;
+  border-bottom:1px solid var(--border);background:rgba(7,7,15,.92);backdrop-filter:blur(24px)}
+.logo{font-family:var(--font-head);font-size:21px;font-weight:800;
+  background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hpills{display:flex;gap:6px;margin-right:auto}
+.hpill{font-family:var(--font-head);font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  padding:3px 10px;border-radius:20px;border:1px solid}
+.hp1{border-color:var(--a3);color:var(--a3);background:rgba(0,201,255,.07)}
+.hp2{border-color:var(--accent);color:var(--accent);background:rgba(108,99,255,.07)}
+.hp3{border-color:var(--green);color:var(--green);background:rgba(0,230,118,.07)}
+.hstatus{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--t2)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2.5s ease-in-out infinite}
+@keyframes blink{50%{opacity:.3;transform:scale(.6)}}
+
+/* ── LAYOUT ────────────────────────────────────────── */
+.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:30px 24px}
+.grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+.left,.right{display:flex;flex-direction:column;gap:14px}
+
+/* ── CARDS ─────────────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color .2s}
+.card:hover{border-color:var(--b2)}
+.ctitle{display:flex;align-items:center;gap:8px;font-family:var(--font-head);font-size:10px;font-weight:700;
+  color:var(--t2);text-transform:uppercase;letter-spacing:1.8px;margin-bottom:14px}
+.ico{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px}
+.ip{background:rgba(108,99,255,.18)}.ir{background:rgba(255,61,107,.18)}.ic{background:rgba(0,201,255,.18)}.ig2{background:rgba(0,230,118,.18)}
+
+/* ── INPUTS ─────────────────────────────────────────── */
+.irow{display:flex;gap:10px}
+.irel{position:relative;flex:1}
+.irel .iico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px}
+input[type=url],input[type=text],input[type=password]{
+  width:100%;background:var(--bg2);border:1px solid var(--b2);border-radius:10px;
+  padding:12px 12px 12px 40px;color:var(--text);font-family:var(--font-body);
+  font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.12)}
+input::placeholder{color:var(--t3)}
+input.ni{padding-left:13px}
+select{background:var(--bg2);border:1px solid var(--b2);border-radius:8px;padding:8px 12px;
+  color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;cursor:pointer}
+
+/* ── BUTTONS ─────────────────────────────────────────── */
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border:none;
+  border-radius:10px;font-family:var(--font-head);font-weight:700;font-size:13px;cursor:pointer;
+  transition:all .2s;white-space:nowrap}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.bg{background:var(--grad);color:#fff;box-shadow:0 4px 20px rgba(108,99,255,.28)}
+.bg:not(:disabled):hover{opacity:.88;transform:translateY(-1px);box-shadow:0 6px 26px rgba(108,99,255,.4)}
+.bgh{background:transparent;border:1px solid var(--b2);color:var(--t2)}
+.bgh:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:7px 14px;font-size:11px;border-radius:8px}
+
+/* ── VIDEO INFO ─────────────────────────────────────── */
+#videoInfo{display:none;gap:13px;align-items:center;background:var(--bg2);border-radius:11px;padding:12px;margin-top:12px}
+#videoInfo.show{display:flex;animation:fup .4s ease}
+@keyframes fup{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.vthumb{width:90px;height:51px;border-radius:7px;flex-shrink:0;object-fit:cover;background:var(--b2)}
+.vtitle{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.vstats{display:flex;gap:10px;font-size:11px;color:var(--t2);flex-wrap:wrap}
+.vbadge{padding:2px 8px;border-radius:4px;background:rgba(0,230,118,.1);color:var(--green);
+  font-size:10px;font-weight:700;margin-top:5px;display:inline-block}
+
+/* ── NETWORKS ─────────────────────────────────────────── */
+.nrow{display:flex;gap:10px;margin-bottom:13px}
+.ncard{flex:1;background:var(--bg2);border:2px solid var(--border);border-radius:11px;padding:13px 8px;
+  text-align:center;cursor:pointer;transition:all .22s;position:relative;user-select:none}
+.ncard:hover{transform:translateY(-2px);border-color:var(--b2)}
+.ncard.sel{transform:translateY(-2px)}
+.ncard.tt.sel{border-color:var(--tt);box-shadow:0 0 18px rgba(254,44,85,.15);background:rgba(254,44,85,.04)}
+.ncheck{position:absolute;top:5px;right:5px;width:14px;height:14px;border-radius:50%;
+  background:var(--green);color:var(--bg);display:none;align-items:center;justify-content:center;font-size:8px;font-weight:700}
+.ncard.sel .ncheck{display:flex}
+.nico{font-size:22px;display:block;margin-bottom:4px}
+.nname{font-family:var(--font-head);font-size:10px;font-weight:700;margin-bottom:1px}
+.nfmt{font-size:9px;color:var(--t3);line-height:1.4}
+
+/* ── FORMAT TOGGLES ──────────────────────────────────── */
+.mtoggle{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);margin-bottom:10px;cursor:pointer;user-select:none}
+.sw{width:32px;height:17px;border-radius:9px;background:var(--b2);position:relative;transition:background .2s;flex-shrink:0}
+.sw::after{content:'';position:absolute;left:3px;top:2.5px;width:12px;height:12px;border-radius:50%;background:var(--t3);transition:all .2s}
+.sw.on{background:var(--accent)}.sw.on::after{left:17px;background:#fff}
+.finfo{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.frow{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;color:var(--t2)}
+.fval{color:var(--text);font-weight:600;font-size:12px}
+.fhi{color:var(--a3)}
+.sep{height:1px;background:var(--border);margin:3px 0}
+
+/* ── PROGRESS ─────────────────────────────────────────── */
+#procCard{display:none}
+#procCard.show{display:block;animation:fup .4s}
+.job{background:var(--bg2);border-radius:9px;padding:12px;margin-bottom:9px;border:1px solid var(--border)}
+.jhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.jname{font-size:13px;font-weight:500}
+.jpct{font-size:12px;color:var(--a3);font-weight:700}
+.pbar{height:3px;background:var(--b2);border-radius:2px;overflow:hidden}
+.pfill{height:100%;border-radius:2px;background:var(--grad);transition:width .35s ease}
+.jstep{font-size:10px;color:var(--t3);margin-top:4px}
+
+/* ── RESULTS ─────────────────────────────────────────── */
+#resultsCard{display:none}
+#resultsCard.show{display:block;animation:fup .5s}
+.rhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.rlbl{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--a3)}
+.rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:11px;overflow:hidden;
+  transition:all .25s;position:relative}
+.sc:hover{transform:translateY(-3px);border-color:var(--b2);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.sthumb{aspect-ratio:9/16;background:#000;position:relative;overflow:hidden}
+.svid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:1}
+.smeta{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;justify-content:space-between;
+  align-items:flex-start;padding:6px 8px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,transparent 100%)}
+.sthumb[data-vfail] .svid{display:none!important}
+.verr{display:none;position:absolute;inset:0;z-index:4;flex-direction:column;align-items:center;
+  justify-content:center;gap:8px;padding:10px;text-align:center;font-size:11px;
+  color:var(--t2);background:rgba(0,0,0,.88)}
+.sthumb[data-vfail] .verr{display:flex}
+.verr a{color:var(--accent);font-weight:700}
+.snum{font-family:var(--font-head);font-size:13px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+.stime{font-size:9px;color:rgba(255,255,255,.8);text-shadow:0 1px 2px rgba(0,0,0,.8)}
+.sdl{display:block;text-align:center;font-size:9px;color:var(--accent);padding:4px 0 2px;font-weight:700}
+.sdl:hover{text-decoration:underline}
+.spub-badge{position:absolute;top:5px;right:5px;background:rgba(0,230,118,.15);color:var(--green);
+  border:1px solid rgba(0,230,118,.35);font-size:8px;font-weight:700;padding:2px 5px;border-radius:20px;display:none}
+.sc.published .spub-badge{display:block}
+.sinfo{padding:7px 9px}
+.sdur{font-size:10px;color:var(--a3);font-weight:600;margin-bottom:2px}
+.spubbtn{display:block;width:100%;padding:7px;border:none;border-radius:0 0 9px 9px;
+  background:var(--grad);color:#fff;font-family:var(--font-head);font-size:10px;font-weight:700;
+  cursor:pointer;transition:opacity .2s}
+.spubbtn:hover{opacity:.85}
+.spubbtn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── PUBLISH BAR ─────────────────────────────────────── */
+#pubBar{display:none;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px 12px;animation:fup .4s}
+#pubBar.show{display:block}
+.pub-targets-title{font-family:var(--font-head);font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:1px}
+.pub-net-block{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:7px}
+.pub-net-block.tt{border-left:3px solid var(--tt)}
+.pub-net-hdr{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:7px}
+.pub-acc-list{display:flex;flex-direction:column;gap:5px;padding-left:4px}
+.pub-acc-lbl{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;color:var(--text)}
+.pub-acc-lbl input{width:14px;height:14px;accent-color:var(--accent);flex-shrink:0}
+.pbactions{display:flex;gap:9px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.pbinfo{font-size:12px;color:var(--t2);margin-right:auto;display:flex;align-items:center}
+
+/* ── ACCOUNTS ─────────────────────────────────────────── */
+.stabs{display:flex;gap:5px;margin-bottom:12px}
+.stab{padding:5px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);color:var(--t2);background:var(--bg2);transition:all .2s}
+.stab.tt.on{background:rgba(254,44,85,.1);border-color:var(--tt);color:var(--tt)}
+.apanel{display:none}.apanel.on{display:block;animation:fup .3s}
+.alist{display:flex;flex-direction:column;gap:6px;max-height:230px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--b2) transparent}
+.aitem{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)}
+.aitem.conn{border-left:2px solid var(--green)}
+.avt{width:32px;height:32px;border-radius:50%;background:var(--grad);display:flex;align-items:center;
+  justify-content:center;font-family:var(--font-head);font-size:11px;font-weight:700;flex-shrink:0;position:relative;overflow:hidden}
+.avt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avtonl{position:absolute;bottom:0;right:0;width:8px;height:8px;border-radius:50%;background:var(--green);border:2px solid var(--card)}
+.ainfo{flex:1;min-width:0}
+.aname{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ahdl{font-size:10px;color:var(--t2)}
+.ast{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;background:rgba(0,230,118,.1);color:var(--green)}
+.addbtn{display:flex;align-items:center;gap:7px;padding:8px 10px;background:transparent;border:1px dashed var(--b2);
+  border-radius:8px;color:var(--t3);font-size:12px;cursor:pointer;width:100%;transition:all .2s;margin-top:5px}
+.addbtn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── QUEUE ───────────────────────────────────────────── */
+.qlist{display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto;scrollbar-width:thin}
+.qitem{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border-radius:7px;border:1px solid var(--border);font-size:12px}
+.qico{font-size:13px}
+.qinfo{flex:1}
+.qn{font-weight:500;margin-bottom:1px}
+.qd{font-size:10px;color:var(--t3)}
+.qst{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600}
+.qs-live{background:rgba(108,99,255,.15);color:var(--accent);animation:blink 1.5s infinite}
+.qs-ok{background:rgba(0,230,118,.1);color:var(--green)}
+.qs-err{background:rgba(255,61,107,.1);color:var(--a2)}
+.qempty{text-align:center;padding:16px;color:var(--t3);font-size:12px}
+
+/* ── STATS ───────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.sbox{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px 15px}
+.sval{font-family:var(--font-head);font-size:24px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.slbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+
+/* ── MODAL ───────────────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);z-index:100;display:none;align-items:center;justify-content:center}
+.overlay.on{display:flex;animation:fup .2s}
+.modal{background:var(--card);border:1px solid var(--b2);border-radius:18px;padding:26px;width:90%;max-width:390px;position:relative}
+.mclose{position:absolute;top:12px;right:12px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;width:25px;height:25px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);font-size:11px;transition:all .2s}
+.mclose:hover{border-color:var(--accent);color:var(--accent)}
+.mtitle{font-family:var(--font-head);font-size:16px;font-weight:800;margin-bottom:3px}
+.msub{font-size:12px;color:var(--t2);margin-bottom:18px}
+.obtn{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:13px;font-weight:500;color:var(--text);margin-bottom:7px;transition:all .2s}
+.obtn:hover{border-color:var(--b2);transform:translateX(3px)}
+.obtn-tt{padding:14px 15px;font-size:15px;font-weight:700;border-color:rgba(254,44,85,.35);background:rgba(254,44,85,.08)}
+.obtn-tt:hover{border-color:var(--tt);background:rgba(254,44,85,.14)}
+.fg{margin-bottom:10px}
+.flbl{font-size:10px;color:var(--t2);letter-spacing:.5px;margin-bottom:4px;display:block;font-weight:600}
+.mdiv{text-align:center;color:var(--t3);font-size:11px;margin:10px 0;position:relative}
+.mdiv::before,.mdiv::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:var(--border)}
+.mdiv::before{left:0}.mdiv::after{right:0}
+
+/* ── NOTIF ───────────────────────────────────────────── */
+#notif{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--b2);
+  border-radius:12px;padding:12px 15px;display:flex;align-items:center;gap:10px;font-size:13px;
+  z-index:200;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.6);
+  transform:translateX(120%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275)}
+#notif.on{transform:translateX(0)}
+.nt{font-weight:600;margin-bottom:1px}
+.ns{font-size:10px;color:var(--t2)}
+
+/* ── STEPPER ─────────────────────────────────────────── */
+.stepper{display:flex;align-items:center;margin-bottom:26px}
+.st{display:flex;align-items:center;gap:7px;cursor:pointer}
+.stc{width:27px;height:27px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:11px;font-weight:700;border:2px solid var(--b2);color:var(--t3);transition:all .3s}
+.stl{font-size:10px;font-weight:500;color:var(--t3);white-space:nowrap;transition:color .3s}
+.st.active .stc{background:var(--grad);border-color:transparent;color:#fff;box-shadow:var(--glow)}
+.st.active .stl{color:var(--text)}
+.st.done .stc{background:var(--green);border-color:transparent;color:var(--bg)}
+.st.done .stl{color:var(--green)}
+.stline{flex:1;height:1px;background:var(--border);margin:0 8px;min-width:10px}
+
+/* ── STREAMING INDICATOR ─────────────────────────────── */
+.stream-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--a3);
+  font-weight:600;padding:2px 8px;border-radius:20px;border:1px solid rgba(0,201,255,.25);
+  background:rgba(0,201,255,.07);margin-left:8px}
+.stream-dot{width:5px;height:5px;border-radius:50%;background:var(--a3);animation:blink 1s infinite}
+
+@media(max-width:900px){.grid{grid-template-columns:1fr}.right{order:-1}.stats{grid-template-columns:repeat(2,1fr)}.rgrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Short<span style="-webkit-text-fill-color:var(--a3)">Factory</span></div>
+  <div class="hpills">
+    <div class="hpill hp1">⚡ Premier short ~30s</div>
+    <div class="hpill hp2">🎬 Streaming progressif</div>
+    <div class="hpill hp3">📤 TikTok Direct Post</div>
+  </div>
+  <div class="hstatus">
+    <div class="dot"></div>
+    Backend: <span id="hBack" style="color:var(--orange)">…</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="st active" id="stp1"><div class="stc">1</div><div class="stl">Vidéo</div></div>
+    <div class="stline"></div>
+    <div class="st" id="stp2"><div class="stc">2</div><div class="stl">Réseaux</div></div>
+    <div class="stline"></div>
+    <div class="st" id="stp3"><div class="stc">3</div><div class="stl">Format</div></div>
+    <div class="stline"></div>
+    <div class="st" id="stp4"><div class="stc">4</div><div class="stl">Génération</div></div>
+    <div class="stline"></div>
+    <div class="st" id="stp5"><div class="stc">5</div><div class="stl">Résultats</div></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="sbox"><div class="sval" id="sv1">0</div><div class="slbl">Shorts générés</div></div>
+    <div class="sbox"><div class="sval" id="sv2">0</div><div class="slbl">Publiés TikTok</div></div>
+    <div class="sbox"><div class="sval" id="sv3">0</div><div class="slbl">Comptes liés</div></div>
+    <div class="sbox"><div class="sval" id="sv4">0</div><div class="slbl">Réseaux actifs</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="left">
+
+      <!-- URL + ANALYSE -->
+      <div class="card">
+        <div class="ctitle"><div class="ico ip">🔗</div>URL YouTube</div>
+        <div class="irow">
+          <div class="irel">
+            <span class="iico">▶</span>
+            <input type="url" id="urlInput" placeholder="https://www.youtube.com/watch?v=…" autocomplete="off">
+          </div>
+          <button class="btn bg" onclick="analyzeVideo()" id="btnAnalyze">Analyser</button>
+        </div>
+        <div id="videoInfo">
+          <img class="vthumb" id="vthumb" src="" alt="">
+          <div style="flex:1;min-width:0">
+            <div class="vtitle" id="vtitle">—</div>
+            <div class="vstats">
+              <span id="vdur">—</span>
+              <span id="vup">—</span>
+            </div>
+            <span class="vbadge" id="vbadge">— shorts</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RÉSEAUX -->
+      <div class="card">
+        <div class="ctitle"><div class="ico ir">📡</div>Réseaux cibles</div>
+        <div class="nrow">
+          <div class="ncard tt" id="nc-tt" onclick="toggleNet('tt')">
+            <div class="ncheck">✓</div>
+            <span class="nico">🎵</span>
+            <div class="nname">TikTok</div>
+            <div class="nfmt">9:16 · 60s · MP4</div>
+          </div>
+          <div class="ncard ig" id="nc-ig" onclick="toggleNet('ig')">
+            <div class="ncheck">✓</div>
+            <span class="nico">📸</span>
+            <div class="nname">Instagram</div>
+            <div class="nfmt">9:16 · Reels</div>
+          </div>
+          <div class="ncard fb" id="nc-fb" onclick="toggleNet('fb')">
+            <div class="ncheck">✓</div>
+            <span class="nico">👥</span>
+            <div class="nname">Facebook</div>
+            <div class="nfmt">9:16 · Reels</div>
+          </div>
+        </div>
+        <!-- Auto-publish CapCut -->
+        <label class="mtoggle" onclick="toggleCapcutAuto()">
+          <div class="sw" id="swCapcut"></div>
+          <span>Publier automatiquement après génération (style CapCut)</span>
+        </label>
+      </div>
+
+      <!-- FORMAT -->
+      <div class="card">
+        <div class="ctitle"><div class="ico ic">⚙️</div>Format de sortie</div>
+        <div class="finfo">
+          <div class="frow"><span>Résolution</span><span class="fval fhi">1080 × 1920 (9:16)</span></div>
+          <div class="sep"></div>
+          <div class="frow"><span>Durée / short</span><span class="fval" id="fSegSec">60s</span></div>
+          <div class="frow"><span>Nombre de shorts</span><span class="fval" id="fShortCount">—</span></div>
+          <div class="frow"><span>Codec</span><span class="fval">H.264 ultrafast</span></div>
+          <div class="frow"><span>Sous-titres</span><span class="fval" id="fSubs">Non</span></div>
+          <div class="sep"></div>
+          <div class="frow"><span>Premier short prêt en</span><span class="fval fhi">~30s</span></div>
+          <div class="frow"><span>Budget total</span><span class="fval" id="fBudget">10 min</span></div>
+        </div>
+      </div>
+
+      <!-- GÉNÉRATION -->
+      <div class="card" id="genCard">
+        <div class="ctitle"><div class="ico ig2">🚀</div>Générer</div>
+        <button class="btn bg" style="width:100%" onclick="startGenerate()" id="btnGen" disabled>
+          ⚡ Générer les Shorts
+        </button>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="card" id="procCard">
+        <div class="ctitle"><div class="ico ic">⏳</div>Progression</div>
+        <div class="job">
+          <div class="jhead"><span class="jname">📥 Téléchargement 480p</span><span class="jpct" id="pct-dl">0%</span></div>
+          <div class="pbar"><div class="pfill" id="bar-dl" style="width:0%"></div></div>
+          <div class="jstep" id="step-dl">En attente…</div>
+        </div>
+        <div class="job">
+          <div class="jhead"><span class="jname">✂️ Découpe + encodage</span><span class="jpct" id="pct-cut">0%</span></div>
+          <div class="pbar"><div class="pfill" id="bar-cut" style="width:0%"></div></div>
+          <div class="jstep" id="step-cut">En attente…</div>
+        </div>
+        <div class="job">
+          <div class="jhead"><span class="jname">📤 Publication</span><span class="jpct" id="pct-pub">—</span></div>
+          <div class="pbar"><div class="pfill" id="bar-pub" style="width:0%"></div></div>
+          <div class="jstep" id="step-pub">En attente…</div>
+        </div>
+      </div>
+
+      <!-- RÉSULTATS -->
+      <div class="card" id="resultsCard">
+        <div class="rhead">
+          <div class="ctitle" style="margin-bottom:0"><div class="ico ig2">🎬</div>
+            <span id="rlbl">Shorts</span>
+            <span class="stream-badge" id="streamBadge" style="display:none"><span class="stream-dot"></span>En cours…</span>
+          </div>
+          <button class="btn bgh btn-sm" onclick="renderResults()">↺ Rafraîchir</button>
+        </div>
+        <div class="rgrid" id="rgrid"></div>
+      </div>
+
+      <!-- PUBLISH BAR -->
+      <div id="pubBar">
+        <div class="pub-targets-title">📤 Publier vers</div>
+        <div style="margin-top:10px" id="pubTargetsContainer"></div>
+        <div class="pbactions">
+          <span class="pbinfo" id="pba">0 compte(s)</span>
+          <button class="btn bgh btn-sm" onclick="publishAll()" id="btnPubAll">
+            🚀 Tout publier (<span id="pbc">0</span> shorts)
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="right">
+
+      <!-- COMPTES CONNECTÉS -->
+      <div class="card">
+        <div class="ctitle"><div class="ico ip">🔑</div>Comptes connectés</div>
+        <div class="stabs">
+          <div class="stab tt on" onclick="switchTab('tt')">🎵 TikTok</div>
+          <div class="stab ig" onclick="switchTab('ig')">📸 Insta</div>
+          <div class="stab fb" onclick="switchTab('fb')">👥 FB</div>
+        </div>
+        <!-- TikTok -->
+        <div class="apanel on" id="panel-tt">
+          <div class="alist" id="alist-tt"></div>
+          <button class="addbtn" onclick="openModal('tt')">+ Connecter un compte TikTok</button>
+        </div>
+        <!-- Instagram -->
+        <div class="apanel" id="panel-ig">
+          <div class="alist" id="alist-ig"></div>
+          <button class="addbtn" onclick="openModal('ig')">+ Connecter Instagram</button>
+        </div>
+        <!-- Facebook -->
+        <div class="apanel" id="panel-fb">
+          <div class="alist" id="alist-fb"></div>
+          <button class="addbtn" onclick="openModal('fb')">+ Connecter Facebook</button>
+        </div>
+      </div>
+
+      <!-- FILE D'ATTENTE PUBLICATION -->
+      <div class="card">
+        <div class="ctitle"><div class="ico ir">📋</div>File de publication</div>
+        <div class="qlist" id="qlist">
+          <div class="qempty">Aucune publication en cours</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONNEXION -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div class="mclose" onclick="closeModal()">✕</div>
+    <div class="mtitle" id="mTitle">Connecter un compte</div>
+    <div class="msub" id="mSub">Autorise ShortFactory à publier pour toi</div>
+    <div id="mBody"></div>
+  </div>
+</div>
+
+<!-- NOTIF -->
+<div id="notif">
+  <span id="nico" style="font-size:17px">ℹ️</span>
+  <div><div class="nt" id="ntit"></div><div class="ns" id="nsub"></div></div>
+</div>
+
+<script>
+/* ═══ CONSTANTES ══════════════════════════════════════ */
+const API = '';
+const COLORS = ['#6c63ff','#ff3d6b','#00c9ff','#00e676','#ff9100','#ffe033'];
+const ACCOUNTS_KEY = 'sf_accounts_v2';
+
+/* ═══ STATE ═══════════════════════════════════════════ */
+const S = {
+  backendOk: false,
+  nets: ['tt'],
+  capcutAuto: true,
+  accounts: { tt: [], ig: [], fb: [] },
+  pubSel: new Set(),
+  currentJob: null,
+  shorts: [],
+  totalPub: 0,
+  videoInfo: null,
+  activeTab: 'tt',
+};
+
+/* ═══ BOOT ════════════════════════════════════════════ */
+(async () => {
+  loadAccountsFromStorage();
+  await checkBackend();
+  await syncAccountsFromBackend();
+  renderAccounts();
+  updateStats();
+  initWebSocket();
+
+  // BroadcastChannel pour popup OAuth
+  try {
+    const bc = new BroadcastChannel('shortfactory-oauth');
+    bc.onmessage = ev => { if (ev.data?.network) onOAuthMsg(ev.data); };
+  } catch(_){}
+
+  // Écoute postMessage OAuth popup
+  window.addEventListener('message', ev => { if (ev.data?.network) onOAuthMsg(ev.data); });
+
+  // Activer TikTok par défaut
+  document.getElementById('nc-tt').classList.add('sel');
+  setStep(1);
+})();
+
+/* ─── Backend check ──────────────────────────────────── */
+async function checkBackend() {
+  try {
+    const r = await fetch(`${API}/api/oauth/status`);
+    const d = await r.json();
+    S.backendOk = true;
+    const el = document.getElementById('hBack');
+    el.textContent = d.tiktok.ready ? 'Prêt ✓' : 'Clés TikTok manquantes';
+    el.style.color = d.tiktok.ready ? 'var(--green)' : 'var(--orange)';
+  } catch {
+    document.getElementById('hBack').textContent = 'Hors ligne';
+  }
+}
+
+/* ─── Stepper ────────────────────────────────────────── */
+function setStep(n) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('stp' + i);
+    el.classList.remove('active', 'done');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  }
+}
+
+/* ═══ VIDEO ANALYSE ═══════════════════════════════════ */
+async function analyzeVideo() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return notif('⚠️','URL manquante','Colle un lien YouTube');
+  document.getElementById('btnAnalyze').disabled = true;
+  document.getElementById('btnAnalyze').textContent = '…';
+  try {
+    const r = await fetch(`${API}/api/video/info?url=${encodeURIComponent(url)}`);
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    S.videoInfo = d;
+    document.getElementById('vthumb').src = d.thumbnail || '';
+    document.getElementById('vtitle').textContent = d.title || '—';
+    document.getElementById('vdur').textContent = '⏱ ' + fmt(d.duration);
+    document.getElementById('vup').textContent = d.uploader || '';
+    document.getElementById('vbadge').textContent = d.shortCount + ' short(s) prévu(s)';
+    document.getElementById('fSegSec').textContent = (d.segmentSec || 60) + 's';
+    document.getElementById('fShortCount').textContent = d.shortCount;
+    document.getElementById('fBudget').textContent = Math.round(d.genBudgetSec / 60) + ' min';
+    document.getElementById('videoInfo').classList.add('show');
+    document.getElementById('btnGen').disabled = false;
+    setStep(2);
+    notif('✅','Vidéo analysée', d.title?.slice(0,50) || '—');
+  } catch (e) {
+    notif('❌','Erreur analyse', e.message.slice(0, 80));
+  } finally {
+    document.getElementById('btnAnalyze').disabled = false;
+    document.getElementById('btnAnalyze').textContent = 'Analyser';
+  }
+}
+
+/* ═══ RÉSEAU TOGGLES ══════════════════════════════════ */
+function toggleNet(n) {
+  const el = document.getElementById('nc-' + n);
+  el.classList.toggle('sel');
+  S.nets = ['tt','ig','fb'].filter(k => document.getElementById('nc-'+k).classList.contains('sel'));
+  updateStats();
+}
+function toggleCapcutAuto() {
+  S.capcutAuto = !S.capcutAuto;
+  const sw = document.getElementById('swCapcut');
+  sw.classList.toggle('on', S.capcutAuto);
+}
+// Activer CapCut auto au démarrage
+document.getElementById('swCapcut').classList.add('on');
+
+/* ═══ GÉNÉRATION ══════════════════════════════════════ */
+async function startGenerate() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return notif('⚠️','URL manquante','');
+  if (!S.nets.length) return notif('⚠️','Réseau','Sélectionne au moins un réseau');
+
+  const pubAcc = S.capcutAuto ? getSelectedPublishAccIds() : [];
+
+  document.getElementById('btnGen').disabled = true;
+  document.getElementById('procCard').classList.add('show');
+  setStep(4);
+
+  // Reset
+  S.shorts = [];
+  document.getElementById('rgrid').innerHTML = '';
+  document.getElementById('resultsCard').classList.remove('show');
+  document.getElementById('pubBar').classList.remove('show');
+  document.getElementById('streamBadge').style.display = 'none';
+  ['dl','cut','pub'].forEach(id => {
+    document.getElementById('bar-' + id).style.width = '0%';
+    document.getElementById('bar-' + id).style.background = 'var(--grad)';
+    document.getElementById('pct-' + id).textContent = '0%';
+    document.getElementById('step-' + id).textContent = 'En attente…';
+  });
+
+  try {
+    const r = await fetch(`${API}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url,
+        networks: S.nets.map(n => n==='tt'?'tiktok':n==='ig'?'instagram':'facebook'),
+        duration: Number(S.videoInfo?.duration) || 0,
+        publishAccounts: pubAcc,
+        videoTitle: document.getElementById('vtitle')?.textContent?.trim() || '',
+      }),
+    });
+    const { jobId } = await r.json();
+    S.currentJob = jobId;
+    notif('⚙️','Génération lancée', 'Premier short dans ~30s · streaming progressif');
+  } catch (e) {
+    notif('❌','Erreur', e.message);
+    document.getElementById('btnGen').disabled = false;
+  }
+}
+
+/* ═══ WEBSOCKET ════════════════════════════════════════ */
+let ws, wsRetry = 0;
+function initWebSocket() {
+  const wsUrl = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host;
+  ws = new WebSocket(wsUrl);
+  ws.onopen = () => { wsRetry = 0; };
+  ws.onmessage = ev => { try { handleWS(JSON.parse(ev.data)); } catch(_){} };
+  ws.onclose = () => {
+    setTimeout(() => { wsRetry++; if (wsRetry < 10) initWebSocket(); }, Math.min(1000 * wsRetry, 5000));
+  };
+}
+
+function handleWS(msg) {
+  const { event, jobId } = msg;
+  if (jobId && S.currentJob && String(jobId) !== String(S.currentJob)) return;
+
+  if (event === 'error') {
+    notif('❌','Erreur génération', msg.message || 'Erreur inconnue');
+    ['dl','cut'].forEach(id => {
+      const bar = document.getElementById('bar-' + id);
+      if (bar && parseFloat(bar.style.width) > 0 && parseFloat(bar.style.width) < 100) {
+        bar.style.background = 'var(--orange)';
+      }
+    });
+    document.getElementById('streamBadge').style.display = 'none';
+    document.getElementById('btnGen').disabled = false;
+    return;
+  }
+
+  if (event === 'progress') {
+    const map = { download:'dl', cut:'cut', publish:'pub' };
+    const id = map[msg.step] || msg.step;
+    const barEl = document.getElementById('bar-' + id);
+    if (!barEl) return;
+    const p = Math.min(100, Math.max(0, Number(msg.pct)));
+    barEl.style.width = p + '%';
+    document.getElementById('pct-' + id).textContent = (p < 100 ? p.toFixed(1) : '100') + '%';
+    document.getElementById('step-' + id).textContent = msg.msg || '';
+    if (p >= 100) barEl.style.background = 'var(--green)';
+  }
+
+  // ⚡ STREAMING PROGRESSIF : un short s'affiche dès qu'il est encodé
+  if (event === 'short_ready' && msg.short) {
+    const s = msg.short;
+    if (S.shorts.find(x => x.id === s.id)) return;
+    S.shorts.push(s);
+
+    if (S.shorts.length === 1) {
+      // Premier short : affiche la section résultats
+      setStep(5);
+      document.getElementById('resultsCard').classList.add('show');
+      document.getElementById('streamBadge').style.display = 'inline-flex';
+      document.getElementById('pubBar').classList.add('show');
+      prunePubSel();
+      if (!S.pubSel.size) initPubSelDefaults();
+      renderPublishTargets();
+      notif('⚡','Premier short prêt !','Les suivants arrivent en streaming…');
+    }
+
+    appendShortCard(s);
+    document.getElementById('rlbl').textContent = S.shorts.length + ' short(s)';
+    document.getElementById('pbc').textContent = S.shorts.length + ' shorts';
+    updateStats();
+  }
+
+  if (event === 'done') {
+    // Assure que tous les shorts sont affichés (évite les manques de race condition)
+    for (const s of (msg.shorts || [])) {
+      if (!S.shorts.find(x => x.id === s.id)) {
+        S.shorts.push(s);
+        appendShortCard(s);
+      }
+    }
+    document.getElementById('rlbl').textContent = S.shorts.length + ' short(s)';
+    document.getElementById('pbc').textContent = S.shorts.length + ' shorts';
+    document.getElementById('streamBadge').style.display = 'none';
+    document.getElementById('btnGen').disabled = false;
+
+    if (S.shorts.length > 0 && !document.getElementById('resultsCard').classList.contains('show')) {
+      setStep(5);
+      document.getElementById('resultsCard').classList.add('show');
+      document.getElementById('pubBar').classList.add('show');
+      prunePubSel();
+      if (!S.pubSel.size) initPubSelDefaults();
+      renderPublishTargets();
+    }
+    notif('🎉','Tous les shorts prêts', S.shorts.length + ' short(s) · clique ⚡ Publier');
+    updateStats();
+  }
+
+  if (event === 'published') {
+    const sc = document.getElementById('sc-' + msg.shortId);
+    if (sc) {
+      sc.classList.add('published');
+      const b = sc.querySelector('.spubbtn');
+      if (b) { b.textContent = '✓ Publié'; b.style.background = 'var(--green)'; b.style.color = 'var(--bg)'; b.disabled = true; }
+    }
+    updateQueue(msg.shortId, 'ok', (msg.username || '') + ' → ' + msg.network);
+    S.totalPub++; updateStats();
+  }
+  if (event === 'publish_error') { updateQueue(msg.shortId, 'err', msg.error); notif('❌','Erreur pub', msg.error); }
+  if (event === 'publish_done') { notif('🎉','Publication TikTok terminée', S.totalPub + ' envoi(s)'); }
+}
+
+/* ─── appendShortCard : ajoute un short dans la grille ─── */
+function appendShortCard(s) {
+  const grid = document.getElementById('rgrid');
+  if (!grid || document.getElementById('sc-' + s.id)) return;
+  const q   = '?v=' + encodeURIComponent(String(S.currentJob || '') + '-' + s.id);
+  const src = API + (s.file || '') + q;
+  const dl  = API + (s.file || '');
+  const div = document.createElement('div');
+  div.className = 'sc'; div.id = 'sc-' + s.id;
+  div.style.animation = 'fup .45s ease';
+  div.innerHTML = `
+    <div class="sthumb">
+      <video class="svid" src="${src}" controls playsinline preload="metadata" onerror="this.closest('.sthumb').setAttribute('data-vfail','1')"></video>
+      <div class="verr">Lecture impossible<br><a href="${dl}" download target="_blank">Télécharger MP4</a></div>
+      <div class="smeta"><span class="snum">#${s.id}</span><span class="stime">${fmt(s.start)}–${fmt(s.end)}</span></div>
+      <div class="spub-badge">✓ Publié</div>
+    </div>
+    <a class="sdl" href="${dl}" download target="_blank" rel="noopener">⬇ Télécharger MP4</a>
+    <div class="sinfo"><div class="sdur">⏱ ${fmt(s.duration)} · 1080×1920 H.264</div></div>
+    <button class="spubbtn" onclick="publishOne(${s.id})">⚡ Publier sur TikTok</button>`;
+  grid.appendChild(div);
+}
+
+function renderResults() {
+  document.getElementById('rgrid').innerHTML = '';
+  for (const s of S.shorts) appendShortCard(s);
+  document.getElementById('rlbl').textContent = S.shorts.length + ' short(s)';
+  document.getElementById('resultsCard').classList.add('show');
+}
+
+/* ═══ PUBLICATION ═════════════════════════════════════ */
+async function publishOne(id) {
+  const short = S.shorts.find(s => s.id === id);
+  if (!short) return;
+  const accIds = getSelectedPublishAccIds();
+  if (!accIds.length) return notif('⚠️','Compte','Coche un compte TikTok sous « Publier vers »');
+  addToQueue(id);
+  await fetch(`${API}/api/publish`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jobId: S.currentJob, shorts: [short], accounts: accIds }),
+  });
+}
+
+async function publishAll() {
+  if (!S.shorts.length) return;
+  const accIds = getSelectedPublishAccIds();
+  if (!accIds.length) return notif('⚠️','Compte','Coche un compte TikTok');
+  S.shorts.forEach(s => addToQueue(s.id));
+  await fetch(`${API}/api/publish`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jobId: S.currentJob, shorts: S.shorts, accounts: accIds }),
+  });
+  notif('🚀','Publication lancée', accIds.length + ' compte(s) · ' + S.shorts.length + ' short(s)');
+}
+
+/* ═══ COMPTES ══════════════════════════════════════════ */
+function renderAccounts() {
+  for (const n of ['tt','ig','fb']) {
+    const list = document.getElementById('alist-' + n);
+    if (!list) continue;
+    list.innerHTML = '';
+    if (!S.accounts[n].length) {
+      list.innerHTML = '<div style="font-size:11px;color:var(--t3);padding:8px 4px">Aucun compte connecté</div>';
+      continue;
+    }
+    for (const a of S.accounts[n]) {
+      const d = document.createElement('div');
+      d.className = 'aitem conn';
+      d.innerHTML = `<div class="avt" style="background:${a.color||'var(--grad)'}">
+        ${a.avatar ? `<img src="${a.avatar}" alt="">` : (a.initials||'?')}
+        <div class="avtonl"></div></div>
+        <div class="ainfo"><div class="aname">${esc(a.username)}</div><div class="ahdl">${a.handle||''}</div></div>
+        <span class="ast">✓ Lié</span>`;
+      list.appendChild(d);
+    }
+  }
+  updateStats();
+}
+
+async function syncAccountsFromBackend() {
+  if (!S.backendOk) return;
+  try {
+    const r = await fetch(`${API}/api/oauth/accounts`);
+    if (!r.ok) return;
+    const { accounts } = await r.json();
+    if (!accounts?.length) return;
+    const netMap = { tiktok:'tt', instagram:'ig', facebook:'fb' };
+    for (const a of accounts) {
+      const nk = netMap[a.network];
+      if (!nk) continue;
+      const idx = S.accounts[nk].findIndex(x => x.accId === a.id);
+      const initials = (a.username || '?').replace(/\s+/g,'').slice(0,2).toUpperCase();
+      const entry = { accId: a.id, username: a.username||'Compte', avatar: a.avatar||'', oauth: true, initials, handle:'', color: COLORS[S.accounts[nk].length % COLORS.length] };
+      if (idx >= 0) S.accounts[nk][idx] = { ...S.accounts[nk][idx], ...entry };
+      else S.accounts[nk].push(entry);
+    }
+    saveAccountsToStorage();
+    renderAccounts();
+  } catch(_){}
+}
+
+function onOAuthMsg(data) {
+  const netMap = { tiktok:'tt', instagram:'ig', facebook:'fb' };
+  const nk = netMap[data.network];
+  if (!nk || !data.accId) return;
+  const initials = (data.username||'?').replace(/\s+/g,'').slice(0,2).toUpperCase();
+  const idx = S.accounts[nk].findIndex(x => x.accId === data.accId);
+  const entry = { accId: data.accId, username: data.username||'Compte', avatar: data.avatar||'', oauth: true, initials, handle:'', color: COLORS[S.accounts[nk].length % COLORS.length] };
+  if (idx >= 0) S.accounts[nk][idx] = { ...S.accounts[nk][idx], ...entry };
+  else S.accounts[nk].push(entry);
+  saveAccountsToStorage();
+  renderAccounts();
+  closeModal();
+  notif('✅', data.network.charAt(0).toUpperCase() + data.network.slice(1) + ' connecté !', data.username || '');
+  setTimeout(() => syncAccountsFromBackend(), 600);
+}
+
+function switchTab(n) {
+  S.activeTab = n;
+  for (const k of ['tt','ig','fb']) {
+    document.getElementById('panel-' + k).classList.toggle('on', k === n);
+    document.querySelectorAll('.stab.' + k).forEach(el => el.classList.toggle('on', k === n));
+  }
+}
+
+function saveAccountsToStorage() {
+  try { sessionStorage.setItem(ACCOUNTS_KEY, JSON.stringify(S.accounts)); } catch(_){}
+}
+function loadAccountsFromStorage() {
+  try {
+    const raw = sessionStorage.getItem(ACCOUNTS_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    for (const k of ['tt','ig','fb']) {
+      if (Array.isArray(data[k])) S.accounts[k] = data[k].filter(a => a?.accId && !String(a.accId).startsWith('local_'));
+    }
+  } catch(_){}
+}
+
+/* ═══ PUBLISH TARGETS ══════════════════════════════════ */
+function initPubSelDefaults() {
+  S.pubSel = new Set();
+  for (const n of ['tt','ig','fb']) for (const a of S.accounts[n]) S.pubSel.add(a.accId);
+}
+function prunePubSel() {
+  const valid = new Set([...S.accounts.tt, ...S.accounts.ig, ...S.accounts.fb].map(a => a.accId));
+  for (const id of S.pubSel) if (!valid.has(id)) S.pubSel.delete(id);
+}
+function getSelectedPublishAccIds() {
+  const fromDom = [...document.querySelectorAll('.pub-acc-cb:checked')].map(cb => cb.dataset.accid).filter(Boolean);
+  if (fromDom.length) { S.pubSel = new Set(fromDom); return fromDom; }
+  prunePubSel(); return [...S.pubSel];
+}
+function renderPublishTargets() {
+  const cont = document.getElementById('pubTargetsContainer');
+  if (!cont) return;
+  const netsWithAcc = ['tt','ig','fb'].filter(n => S.accounts[n].length > 0);
+  if (!netsWithAcc.length) { cont.innerHTML = '<div style="font-size:12px;color:var(--t3);padding:6px 0">Aucun compte connecté — connecte TikTok ci-contre</div>'; return; }
+  const labels = { tt:'🎵 TikTok', ig:'📸 Instagram', fb:'👥 Facebook' };
+  cont.innerHTML = netsWithAcc.map(n => `
+    <div class="pub-net-block ${n}">
+      <div class="pub-net-hdr">${labels[n]}
+        <input type="checkbox" id="pub-net-${n}" class="pub-master-cb" data-net="${n}" style="margin-left:auto;width:14px;height:14px;accent-color:var(--accent)">
+      </div>
+      <div class="pub-acc-list">
+        ${S.accounts[n].map(a => `<label class="pub-acc-lbl">
+          <input type="checkbox" class="pub-acc-cb" data-net="${n}" data-accid="${a.accId}" ${S.pubSel.has(a.accId)?'checked':''}>
+          ${esc(a.username)}
+        </label>`).join('')}
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('.pub-master-cb').forEach(cb => {
+    cb.checked = S.accounts[cb.dataset.net].every(a => S.pubSel.has(a.accId));
+    cb.onchange = () => {
+      for (const a of S.accounts[cb.dataset.net]) { if (cb.checked) S.pubSel.add(a.accId); else S.pubSel.delete(a.accId); }
+      renderPublishTargets();
+    };
+  });
+  document.querySelectorAll('.pub-acc-cb').forEach(cb => {
+    cb.onchange = () => { if (cb.checked) S.pubSel.add(cb.dataset.accid); else S.pubSel.delete(cb.dataset.accid); updatePubBarCount(); };
+  });
+  updatePubBarCount();
+}
+function updatePubBarCount() {
+  const n = getSelectedPublishAccIds().length;
+  const el = document.getElementById('pba');
+  if (el) el.textContent = n + ' compte(s) sélectionné(s)';
+}
+
+/* ═══ QUEUE ════════════════════════════════════════════ */
+function addToQueue(id) {
+  const list = document.getElementById('qlist');
+  list.querySelector('.qempty')?.remove();
+  if (document.getElementById('qi-' + id)) return;
+  const el = document.createElement('div');
+  el.className = 'qitem'; el.id = 'qi-' + id;
+  el.innerHTML = `<div class="qico">🎬</div><div class="qinfo"><div class="qn">Short #${id}</div><div class="qd">TikTok · ~60s · 9:16</div></div><div class="qst qs-live" id="qs-${id}">⟳ En cours</div>`;
+  list.prepend(el);
+}
+function updateQueue(id, status, detail) {
+  const el = document.getElementById('qs-' + id);
+  if (!el) return;
+  el.className = 'qst qs-' + (status === 'ok' ? 'ok' : 'err');
+  el.textContent = status === 'ok' ? '✓ Publié' : '✗ Erreur';
+  const d = el.closest('.qitem')?.querySelector('.qd');
+  if (d && detail) d.textContent = detail;
+}
+
+/* ═══ MODAL ════════════════════════════════════════════ */
+function openModal(n) {
+  const labels = { tt: 'TikTok', ig: 'Instagram', fb: 'Facebook' };
+  document.getElementById('mTitle').textContent = 'Connecter ' + labels[n];
+  document.getElementById('mSub').textContent = 'Autorise ShortFactory à publier pour toi';
+  const b = document.getElementById('mBody');
+  if (n === 'tt') {
+    b.innerHTML = `<button class="obtn obtn-tt" onclick="window.open('${API}/auth/tiktok','_blank','width=480,height=720')">
+      <span>🎵</span><span class="olbl">Continuer avec TikTok</span>
+    </button>`;
+  } else {
+    b.innerHTML = `<p style="font-size:12px;color:var(--t2);text-align:center;padding:16px">Connexion ${labels[n]} disponible prochainement.</p>`;
+  }
+  document.getElementById('modal').classList.add('on');
+}
+function closeModal() { document.getElementById('modal').classList.remove('on'); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+/* ═══ STATS ════════════════════════════════════════════ */
+function updateStats() {
+  cnt('sv1', S.shorts.length);
+  cnt('sv2', S.totalPub);
+  cnt('sv3', Object.values(S.accounts).reduce((s,a) => s + a.length, 0));
+  cnt('sv4', S.nets.length);
+}
+function cnt(id, v) {
+  const el = document.getElementById(id);
+  const c = parseInt(el.textContent) || 0;
+  if (c === v) return;
+  const step = Math.sign(v - c); let x = c;
+  const iv = setInterval(() => { x += step; el.textContent = x; if (x === v) clearInterval(iv); }, 30);
+}
+
+/* ═══ NOTIF ════════════════════════════════════════════ */
+let _nt;
+function notif(ico, tit, sub) {
+  clearTimeout(_nt);
+  document.getElementById('nico').textContent = ico;
+  document.getElementById('ntit').textContent = tit;
+  document.getElementById('nsub').textContent = sub;
+  document.getElementById('notif').classList.add('on');
+  _nt = setTimeout(() => document.getElementById('notif').classList.remove('on'), 3800);
+}
+
+/* ═══ UTILS ════════════════════════════════════════════ */
+function fmt(s) { if (!s) return '—'; const m = Math.floor(s/60), sc = Math.floor(s%60); return `${m}:${String(sc).padStart(2,'0')}`; }
+function esc(s) { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>

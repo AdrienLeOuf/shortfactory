@@ -1,0 +1,45 @@
+# render.yaml — Déploiement Render.com
+# https://render.com/docs/yaml-spec
+#
+# ══════════════════════════════════════════════════════════════════════════════
+#  VARIABLES SECRÈTES → à définir dans le Dashboard Render → Environment
+#  (ne pas les mettre ici, ce fichier est public)
+#
+#   TIKTOK_CLIENT_KEY     → aw7o1osbhtac2nzo
+#   TIKTOK_CLIENT_SECRET  → ton secret TikTok
+#   TIKTOK_REDIRECT_URI   → https://shortfactory.onrender.com/auth/tiktok/callback
+#   PUBLIC_BASE_URL       → https://shortfactory.onrender.com
+#   TIKTOK_PRIVACY_LEVEL  → SELF_ONLY
+# ══════════════════════════════════════════════════════════════════════════════
+
+services:
+  - type: web
+    name: shortfactory
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: CAPCUT_PUBLISH_AFTER_GENERATE
+        value: "1"
+      - key: GEN_BUDGET_MS
+        value: "600000"
+      - key: SHORT_SEGMENT_SEC
+        value: "60"
+      - key: GEN_MAX_SHORTS
+        value: "100"
+      - key: ENCODE_PRESET
+        value: "ultrafast"
+      - key: ENCODE_CRF
+        value: "26"
+      - key: ENCODE_PARALLEL
+        value: "2"
+      - key: SUBTITLE_BURN
+        value: "0"
+      - key: SHORTS_FRAME_FIT
+        value: "pad"
+      - key: TIKTOK_UNAUDITED_DEFAULT
+        value: "1"

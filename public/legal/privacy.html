@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Politique de confidentialité — ShortFactory</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#07070f;color:#e0e0f0;line-height:1.7;padding:0}
+  .wrap{max-width:780px;margin:0 auto;padding:60px 28px 80px}
+  h1{font-size:32px;font-weight:800;margin-bottom:6px;background:linear-gradient(135deg,#6c63ff,#ff3d6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{color:#7878aa;font-size:14px;margin-bottom:48px}
+  h2{font-size:18px;font-weight:700;color:#c0c0e8;margin:36px 0 12px;padding-bottom:8px;border-bottom:1px solid #1c1c32}
+  p{color:#a0a0c8;font-size:15px;margin-bottom:14px}
+  ul{color:#a0a0c8;font-size:15px;padding-left:22px;margin-bottom:14px}
+  ul li{margin-bottom:6px}
+  a{color:#6c63ff;text-decoration:none}
+  a:hover{text-decoration:underline}
+  .logo{font-size:22px;font-weight:800;background:linear-gradient(135deg,#6c63ff,#00c9ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:40px;display:block}
+  .highlight{background:#0f0f1e;border:1px solid #1c1c32;border-left:3px solid #6c63ff;border-radius:8px;padding:14px 18px;margin-bottom:16px}
+  .highlight p{margin:0;color:#c0c0e8}
+  .footer{margin-top:60px;padding-top:24px;border-top:1px solid #1c1c32;font-size:13px;color:#3d3d60}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="logo" href="/">ShortFactory</a>
+  <h1>Politique de confidentialité</h1>
+  <p class="sub">Dernière mise à jour : 1er janvier 2025</p>
+
+  <div class="highlight">
+    <p>🔒 ShortFactory ne vend jamais vos données personnelles à des tiers et ne les utilise qu'aux seules fins décrites dans cette politique.</p>
+  </div>
+
+  <h2>1. Responsable du traitement</h2>
+  <p>ShortFactory est le responsable du traitement de vos données personnelles dans le cadre de l'utilisation de l'Application.</p>
+
+  <h2>2. Données collectées</h2>
+  <p>Nous collectons uniquement les données strictement nécessaires au fonctionnement de l'Application :</p>
+  <ul>
+    <li><strong>Données de compte TikTok :</strong> identifiant unique (open_id), nom d'affichage, URL de l'avatar — obtenus via l'API TikTok après votre autorisation explicite</li>
+    <li><strong>Tokens d'accès OAuth :</strong> access token et refresh token TikTok, stockés localement sur le serveur pour permettre la publication en votre nom</li>
+    <li><strong>Fichiers vidéo temporaires :</strong> les vidéos traitées sont stockées temporairement sur le serveur (dossiers <code>tmp/</code> et <code>output/</code>) et automatiquement supprimées après traitement</li>
+    <li><strong>Journaux techniques :</strong> logs d'erreurs et d'activité à des fins de débogage, sans données personnelles identifiantes</li>
+  </ul>
+
+  <h2>3. Finalités du traitement</h2>
+  <p>Vos données sont utilisées exclusivement pour :</p>
+  <ul>
+    <li>Authentifier votre compte TikTok via OAuth 2.0</li>
+    <li>Afficher vos informations de compte dans l'interface de l'Application</li>
+    <li>Publier des vidéos sur votre compte TikTok en votre nom, selon vos instructions</li>
+    <li>Maintenir votre session active via le renouvellement automatique des tokens</li>
+  </ul>
+
+  <h2>4. Données TikTok — scopes utilisés</h2>
+  <p>L'Application demande les autorisations (scopes) TikTok suivantes :</p>
+  <ul>
+    <li><strong>user.info.basic :</strong> lecture de votre nom d'affichage et de votre avatar, uniquement pour les afficher dans l'interface</li>
+    <li><strong>video.upload :</strong> téléversement de fichiers vidéo sur les serveurs TikTok</li>
+    <li><strong>video.publish :</strong> publication des vidéos sur votre profil TikTok</li>
+  </ul>
+  <p>Nous n'accédons à aucune autre donnée de votre compte TikTok (vidéos existantes, abonnés, messages, etc.).</p>
+
+  <h2>5. Conservation des données</h2>
+  <ul>
+    <li><strong>Tokens OAuth :</strong> conservés jusqu'à leur révocation par vos soins ou jusqu'à leur expiration naturelle</li>
+    <li><strong>Fichiers vidéo temporaires :</strong> supprimés automatiquement après encodage et publication (généralement quelques minutes à quelques heures)</li>
+    <li><strong>Données de profil :</strong> conservées tant que votre compte est connecté à l'Application</li>
+  </ul>
+
+  <h2>6. Partage des données</h2>
+  <p>Nous ne partageons vos données avec aucun tiers, à l'exception des APIs officielles de TikTok nécessaires au fonctionnement du service. Nous n'utilisons aucun outil d'analytics, de publicité ou de tracking tiers.</p>
+
+  <h2>7. Sécurité</h2>
+  <p>Les tokens OAuth sont stockés dans un fichier JSON sur le serveur, protégé par les mécanismes de sécurité du système d'exploitation. Les communications avec les APIs TikTok s'effectuent exclusivement via HTTPS.</p>
+
+  <h2>8. Vos droits</h2>
+  <p>Vous disposez des droits suivants concernant vos données :</p>
+  <ul>
+    <li><strong>Droit d'accès et de rectification :</strong> vous pouvez consulter les données vous concernant</li>
+    <li><strong>Droit à l'effacement :</strong> vous pouvez supprimer votre compte connecté à tout moment depuis l'interface</li>
+    <li><strong>Droit de révocation :</strong> vous pouvez révoquer les autorisations TikTok depuis les paramètres de votre compte TikTok → Applications connectées</li>
+  </ul>
+
+  <h2>9. Cookies</h2>
+  <p>L'Application n'utilise pas de cookies de traçage ou publicitaires. Seul le stockage de session du navigateur (<code>sessionStorage</code>) est utilisé pour maintenir l'état de l'interface.</p>
+
+  <h2>10. Modifications</h2>
+  <p>Nous nous réservons le droit de modifier cette politique à tout moment. Toute modification sera publiée sur cette page avec une date de mise à jour.</p>
+
+  <h2>11. Contact</h2>
+  <p>Pour exercer vos droits ou pour toute question relative à la présente politique, contactez-nous via l'interface de l'Application.</p>
+
+  <div class="footer">
+    © 2025 ShortFactory · <a href="/legal/terms">Conditions d'utilisation</a> · <a href="/">Accueil</a>
+  </div>
+</div>
+</body>
+</html>
