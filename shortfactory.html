@@ -352,7 +352,11 @@ select{background:var(--bg2);border:1px solid var(--b2);border-radius:8px;paddin
         <!-- Auto-publish CapCut -->
         <label class="mtoggle" onclick="toggleCapcutAuto()">
           <div class="sw" id="swCapcut"></div>
-          <span>Publier automatiquement après génération (style CapCut)</span>
+          <span>Publier automatiquement après chaque short (comme CapCut)</span>
+        </label>
+        <label class="mtoggle" onclick="toggleCapcutSubs()" style="margin-bottom:0">
+          <div class="sw on" id="swCapSubs"></div>
+          <span>Mots à l’écran type CapCut (hooks animés en bas)</span>
         </label>
       </div>
 
@@ -492,6 +496,7 @@ const S = {
   backendOk: false,
   nets: ['tt'],
   capcutAuto: true,
+  capcutSubs: true,
   accounts: { tt: [], ig: [], fb: [] },
   pubSel: new Set(),
   currentJob: null,
@@ -591,8 +596,19 @@ function toggleCapcutAuto() {
   const sw = document.getElementById('swCapcut');
   sw.classList.toggle('on', S.capcutAuto);
 }
+function toggleCapcutSubs() {
+  S.capcutSubs = !S.capcutSubs;
+  document.getElementById('swCapSubs').classList.toggle('on', S.capcutSubs);
+  syncSubsLabel();
+}
+function syncSubsLabel() {
+  const el = document.getElementById('fSubs');
+  if (el) el.textContent = S.capcutSubs ? 'Oui · hooks animés' : 'Non (video seule)';
+}
 // Activer CapCut auto au démarrage
 document.getElementById('swCapcut').classList.add('on');
+document.getElementById('swCapSubs').classList.add('on');
+syncSubsLabel();
 
 /* ═══ GÉNÉRATION ══════════════════════════════════════ */
 async function startGenerate() {
@@ -629,6 +645,7 @@ async function startGenerate() {
         duration: Number(S.videoInfo?.duration) || 0,
         publishAccounts: pubAcc,
         videoTitle: document.getElementById('vtitle')?.textContent?.trim() || '',
+        subtitleBurn: S.capcutSubs,
       }),
     });
     const { jobId } = await r.json();

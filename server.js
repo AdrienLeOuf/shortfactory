@@ -350,13 +350,14 @@ app.get('/api/video/info', async (req, res) => {
 //  2. GÉNÉRATION DES SHORTS (streaming progressif)
 // ═════════════════════════════════════════════════════════════════════════════
 app.post('/api/generate', async (req, res) => {
-  const { url, networks, duration: srcDuration, publishAccounts, videoTitle } = req.body;
+  const { url, networks, duration: srcDuration, publishAccounts, videoTitle, subtitleBurn } = req.body;
   if (!url || !networks?.length) return res.status(400).json({ error: 'url + networks requis' });
   const jobId = uuidv4();
   res.json({ jobId, message: 'Génération démarrée' });
   runGenJob(jobId, url, networks, Number(srcDuration) || 0, {
     publishAccounts: Array.isArray(publishAccounts) ? publishAccounts : [],
     videoTitle: String(videoTitle || '').trim(),
+    subtitleBurn: typeof subtitleBurn === 'boolean' ? subtitleBurn : SUBTITLE_BURN,
   });
 });
 
@@ -389,7 +390,9 @@ async function runGenJob(jobId, url, networks, srcDuration, opts) {
   };
 
   try {
-    const { shorts, totalSec, shortCount } = await runGeneration(jobId, url, srcDuration, onBatch);
+    const { shorts, totalSec, shortCount } = await runGeneration(jobId, url, srcDuration, onBatch, {
+      subtitleBurn: opts.subtitleBurn,
+    });
     clearTimeout(budgetTimer);
     broadcast(jobId, 'done', { shorts: allShorts, totalDuration: totalSec, shortCount });
   } catch (err) {
@@ -399,7 +402,10 @@ async function runGenJob(jobId, url, networks, srcDuration, opts) {
   }
 }
 
-async function runGeneration(jobId, url, srcDuration, onBatch) {
+async function runGeneration(jobId, url, srcDuration, onBatch, genOpts = {}) {
+  const burn = genOpts.subtitleBurn !== undefined && genOpts.subtitleBurn !== null
+    ? !!genOpts.subtitleBurn
+    : SUBTITLE_BURN;
   const jobDir = path.join(WORK_DIR, jobId);
   fs.mkdirSync(jobDir, { recursive: true });
 
@@ -452,15 +458,15 @@ async function runGeneration(jobId, url, srcDuration, onBatch) {
   if (!Number.isFinite(totalSec) || totalSec <= 0) throw new Error('Durée vidéo introuvable');
 
   const shortCount = Math.min(GEN_MAX_SHORTS, Math.max(1, Math.ceil(totalSec / SHORT_SEGMENT_SEC)));
-  const words = SUBTITLE_BURN ? buildDecorWords(totalSec) : [];
+  const words = burn ? buildDecorWords(totalSec) : [];
   const codecLbl = USE_H265 ? 'H.265' : 'H.264';
-  broadcast(jobId, 'progress', { step: 'cut', pct: 0, msg: `${shortCount} short(s) × ${SHORT_SEGMENT_SEC}s · ${codecLbl} ${ENCODE_PRESET}${SUBTITLE_BURN ? ' · sous-titres' : ''}` });
+  broadcast(jobId, 'progress', { step: 'cut', pct: 0, msg: `${shortCount} short(s) × ${SHORT_SEGMENT_SEC}s · ${codecLbl} ${ENCODE_PRESET}${burn ? ' · mots CapCut' : ''}` });
 
   const shorts = [];
   for (let b = 0; b < shortCount; b += ENCODE_PARALLEL) {
     const slice = [];
     for (let k = 0; k < ENCODE_PARALLEL && b + k < shortCount; k++) {
-      slice.push(encodeShort(jobId, jobDir, rawVideo, words, totalSec, b + k));
+      slice.push(encodeShort(jobId, jobDir, rawVideo, words, totalSec, b + k, burn));
     }
     const done = await Promise.all(slice);
     done.sort((a, z) => a.id - z.id);
@@ -474,7 +480,7 @@ async function runGeneration(jobId, url, srcDuration, onBatch) {
 }
 
 // ─── Encodage d'un short ──────────────────────────────────────────────────────
-async function encodeShort(jobId, jobDir, rawVideo, words, totalSec, i) {
+async function encodeShort(jobId, jobDir, rawVideo, words, totalSec, i, burn) {
   const start   = i * SHORT_SEGMENT_SEC;
   const end     = Math.min(start + SHORT_SEGMENT_SEC, totalSec);
   const dur     = Math.max(0.1, end - start);
@@ -482,18 +488,18 @@ async function encodeShort(jobId, jobDir, rawVideo, words, totalSec, i) {
 
   const assName = `sub_${i}.ass`;
   const assFile = path.join(jobDir, assName);
-  const subWords = SUBTITLE_BURN
+  const subWords = burn
     ? words.filter(w => w.end > start && w.start < end)
-           .map(w => ({ word: w.word, start: Math.max(w.start, start), end: Math.min(w.end, end) }))
-           .filter(w => w.word && w.end > w.start)
+      .map(w => ({ word: w.word, start: Math.max(w.start, start), end: Math.min(w.end, end) }))
+      .filter(w => w.word && w.end > w.start)
     : [];
-  if (SUBTITLE_BURN) writeASS(subWords, start, assFile, OUT_W, OUT_H);
+  if (burn) writeASS(subWords, start, assFile, OUT_W, OUT_H);
 
   const lanczos = ':flags=lanczos';
   const vfBase = FIT_PAD
     ? `scale=${OUT_W}:${OUT_H}:force_original_aspect_ratio=decrease${lanczos},pad=${OUT_W}:${OUT_H}:(ow-iw)/2:(oh-ih)/2:black,setsar=1`
     : `scale=${OUT_W}:${OUT_H}:force_original_aspect_ratio=increase${lanczos},crop=${OUT_W}:${OUT_H},setsar=1`;
-  const vfSub      = SUBTITLE_BURN ? `${vfBase},subtitles=${assName}` : vfBase;
+  const vfSub      = burn ? `${vfBase},subtitles=${assName}` : vfBase;
   const vfFallback = `scale=${OUT_W}:${OUT_H}:flags=bilinear`;
 
   const vArgs = USE_H265
@@ -524,7 +530,7 @@ async function encodeShort(jobId, jobDir, rawVideo, words, totalSec, i) {
     });
   }
 
-  const attempts = SUBTITLE_BURN
+  const attempts = burn
     ? [() => runFF(vfSub, true), () => runFF(vfBase, true), () => runFF(vfBase, false), () => runFF(vfFallback, false)]
     : [() => runFF(vfBase, true), () => runFF(vfBase, false), () => runFF(vfFallback, false)];
 
@@ -533,7 +539,7 @@ async function encodeShort(jobId, jobDir, rawVideo, words, totalSec, i) {
     try { await fn(); lastErr = null; break; }
     catch (e) { lastErr = e; console.warn(`[ffmpeg short ${i+1}]`, e.message.slice(0, 120)); }
   }
-  if (SUBTITLE_BURN) try { fs.unlinkSync(assFile); } catch {}
+  if (burn) try { fs.unlinkSync(assFile); } catch {}
   if (lastErr) throw lastErr;
 
   return { id: i + 1, start, end, duration: end - start, file: `/output/${jobId}_short_${i + 1}.mp4`, localPath: outFile, width: OUT_W, height: OUT_H };
@@ -547,7 +553,10 @@ function buildTitle(videoTitle, shortId) {
 
 // ─── Mots décoratifs ASS ──────────────────────────────────────────────────────
 function buildDecorWords(totalDuration) {
-  const hooks = ['SWIPE','RESTE','LIKE','FOLLOW','PARTAGE','VIRAL','TOP','GO','CLIP','WOW'];
+  const hooks = [
+    'SWIPE','REGARDE','LIKE','FOLLOW','PARTAGE','VIRAL','WOW','CLIP','ICI','ABONNE',
+    'RESTE','TOP','GO','FYP','TREND',
+  ];
   const words = [];
   let t = 0, i = 0;
   while (t < totalDuration - 0.1) {
@@ -570,7 +579,9 @@ function writeASS(words, segStart, filePath, pw, ph) {
   }
   const esc2 = s => String(s).replace(/\\/g,'\\\\').replace(/\{/g,'\\{').replace(/\}/g,'\\}');
   const header = `[Script Info]\nScriptType: v4.00+\nPlayResX: ${pw}\nPlayResY: ${ph}\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Word,Arial Black,${fsz},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,4,2,2,40,40,${mv},1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`;
-  let lines = words.map(w => `Dialogue: 0,${toT(w.start)},${toT(w.end)},Word,,0,0,0,,{\\an2\\pos(${px},${py})\\fscx110\\fscy110}${esc2(w.word).toUpperCase()}`).join('\n');
+  let lines = words.map(w =>
+    `Dialogue: 0,${toT(w.start)},${toT(w.end)},Word,,0,0,0,,{\\an2\\pos(${px},${py})\\fad(55,35)\\fscx108\\fscy108\\3c&H000000&\\b1}${esc2(w.word).toUpperCase()}`
+  ).join('\n');
   if (!lines.trim()) lines = `Dialogue: 0,0:00:00.00,0:00:01.00,Word,,0,0,0,,{\\an2\\pos(${px},${py})}CLIP`;
   fs.writeFileSync(filePath, header + lines, 'utf8');
 }
