@@ -34,10 +34,27 @@ const PORT      = process.env.PORT || 3000;
 const WORK_DIR  = path.join(__dirname, 'tmp');
 const OUT_DIR   = path.join(__dirname, 'output');
 const DATA_DIR  = path.join(__dirname, 'data');
-const LEGAL_DIR = path.join(__dirname, 'public', 'legal');
+const LEGAL_DIR  = path.join(__dirname, 'public', 'legal');
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const INDEX_HTML = path.join(__dirname, 'shortfactory.html');
 const TOKENS_PATH = process.env.OAUTH_TOKENS_FILE || path.join(DATA_DIR, 'oauth-tokens.json');
 
+function readLegalPage(name) {
+  const p = path.join(LEGAL_DIR, name);
+  try {
+    return fs.readFileSync(p, 'utf8');
+  } catch (e) {
+    console.error(`[legal] fichier manquant ou illisible: ${p} — ${e.message}`);
+    return null;
+  }
+}
+
 [WORK_DIR, OUT_DIR, DATA_DIR].forEach(d => !fs.existsSync(d) && fs.mkdirSync(d, { recursive: true }));
+
+const LEGAL_PAGES = {
+  terms:   readLegalPage('terms.html'),
+  privacy: readLegalPage('privacy.html'),
+};
 
 // ─── Configuration génération ─────────────────────────────────────────────────
 const SHORT_SEGMENT_SEC = Math.max(5, Math.min(600, Number(process.env.SHORT_SEGMENT_SEC) || 60));
@@ -134,10 +151,16 @@ function esc(s) {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-//  ROUTES LÉGALES (TikTok en a besoin avant tout)
+//  ROUTES LÉGALES (TikTok en a besoin avant tout — HTML préchargé, pas de sendFile)
 // ═════════════════════════════════════════════════════════════════════════════
-app.get('/legal/terms',   (req, res) => res.sendFile(path.join(LEGAL_DIR, 'terms.html')));
-app.get('/legal/privacy', (req, res) => res.sendFile(path.join(LEGAL_DIR, 'privacy.html')));
+app.get('/legal/terms', (req, res) => {
+  if (!LEGAL_PAGES.terms) return res.status(404).type('txt').send('Not Found');
+  res.status(200).type('html').send(LEGAL_PAGES.terms);
+});
+app.get('/legal/privacy', (req, res) => {
+  if (!LEGAL_PAGES.privacy) return res.status(404).type('txt').send('Not Found');
+  res.status(200).type('html').send(LEGAL_PAGES.privacy);
+});
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  API — Infos setup TikTok (utile pour debug)
@@ -274,9 +297,14 @@ app.post('/api/tiktok/webhook', (req, res) => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
-//  FICHIERS STATIQUES
+//  PAGE D'ACCUEIL (avant express.static pour éviter tout conflit avec « / »)
 // ═════════════════════════════════════════════════════════════════════════════
-app.use(express.static(path.join(__dirname, 'public')));
+app.get('/', (req, res) => res.sendFile(INDEX_HTML));
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  FICHIERS STATIQUES (/legal/*.html aussi servi ici en secours si extension .html)
+// ═════════════════════════════════════════════════════════════════════════════
+app.use(express.static(PUBLIC_DIR, { extensions: ['html'], maxAge: '1h', index: false }));
 
 // Streaming vidéo avec Range (lecture <video> fiable dans le navigateur)
 app.get('/output/:file', (req, res, next) => {
@@ -293,8 +321,6 @@ app.get('/output/:file', (req, res, next) => {
   });
 });
 app.use('/output', express.static(OUT_DIR));
-
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'shortfactory.html')));
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  1. METADATA YOUTUBE
@@ -688,6 +714,9 @@ wss.on('error', onListenErr);
 
 server.listen(PORT, () => {
   const base = publicBase();
+  if (!LEGAL_PAGES.terms || !LEGAL_PAGES.privacy) {
+    console.error('\n   ⚠  Pages légales manquantes (/public/legal). TikTok refusera les URLs tant que le déploiement n’inclut pas ces fichiers.\n');
+  }
   console.log(`\n🚀 ShortFactory → http://localhost:${PORT}`);
   console.log(`   ${SHORT_SEGMENT_SEC}s/short · max ${GEN_MAX_SHORTS} · budget ${GEN_BUDGET_MS/1000}s · ${ENCODE_PARALLEL}× parallèle · ${ENCODE_PRESET} · subs:${SUBTITLE_BURN}`);
   if (base) {
