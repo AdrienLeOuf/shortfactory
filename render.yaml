@@ -1,5 +1,10 @@
-# render.yaml — Déploiement Render.com
+# render.yaml — Déploiement Render.com (Web Service DOCKER, pas Static Site)
 # https://render.com/docs/yaml-spec
+#
+# Déploiement en 1 clic (Blueprint) :
+#   Dashboard Render → New → Blueprint → Connecter AdrienLeOuf/shortfactory
+# Ou à la main : New → Web Service → Runtime « Docker » → même repo.
+# Ne pas choisir « Static Site » : ShortFactory = Node (server.js) + ffmpeg dans le Dockerfile.
 #
 # ══════════════════════════════════════════════════════════════════════════════
 #  VARIABLES SECRÈTES → à définir dans le Dashboard Render → Environment
@@ -17,6 +22,8 @@ services:
     name: shortfactory
     runtime: docker
     dockerfilePath: ./Dockerfile
+    branch: main
+    healthCheckPath: /health
     plan: free
     envVars:
       - key: NODE_ENV

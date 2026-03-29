@@ -162,6 +162,9 @@ app.get('/legal/privacy', (req, res) => {
   res.status(200).type('html').send(LEGAL_PAGES.privacy);
 });
 
+// Santé Render (health check léger — pas de DB)
+app.get('/health', (req, res) => res.status(200).type('txt').send('ok'));
+
 // ═════════════════════════════════════════════════════════════════════════════
 //  API — Infos setup TikTok (utile pour debug)
 // ═════════════════════════════════════════════════════════════════════════════
