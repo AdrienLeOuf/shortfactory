@@ -164,11 +164,9 @@ select{background:var(--bg2);border:1px solid var(--b2);border-radius:8px;paddin
 .spub-hint{display:block;width:100%;padding:9px 10px;border-radius:0 0 9px 9px;background:rgba(0,201,255,.08);border-top:1px solid var(--border);
   color:var(--t2);font-size:10px;line-height:1.45;font-weight:600;text-align:center}
 .sqr-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 8px 8px;border-top:1px solid var(--border);
-  background:linear-gradient(180deg,rgba(254,44,85,.06),transparent)}
+  background:linear-gradient(180deg,rgba(0,122,255,.07),transparent)}
 .sqr-wrap img{width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;padding:6px;box-shadow:0 2px 12px rgba(0,0,0,.35)}
-.sqr-wrap .sqr-lbl{font-size:9px;color:var(--t3);text-align:center;max-width:148px;line-height:1.35;font-weight:600}
-.sqr-wrap a.sqr-tt{color:var(--tt);font-size:9px;text-decoration:none;font-weight:700}
-.sqr-wrap a.sqr-tt:hover{text-decoration:underline}
+.sqr-wrap .sqr-lbl{font-size:9px;color:var(--t3);text-align:center;max-width:160px;line-height:1.4;font-weight:600}
 
 /* ── PUBLISH BAR ─────────────────────────────────────── */
 #pubBar{display:none;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px 12px;animation:fup .4s}
@@ -277,7 +275,7 @@ select{background:var(--bg2);border:1px solid var(--b2);border-radius:8px;paddin
   <div class="hpills">
     <div class="hpill hp1">⚡ Premier short ~30s</div>
     <div class="hpill hp2">🎬 Streaming progressif</div>
-    <div class="hpill hp3">📥 MP4 → TikTok (import manuel ou API)</div>
+    <div class="hpill hp3">📱 QR iPhone · MP4 → Photos</div>
   </div>
   <div class="hstatus">
     <div class="dot"></div>
@@ -566,7 +564,7 @@ async function checkBackend() {
       el.textContent = 'Prêt ✓ (publication API)';
       el.style.color = 'var(--green)';
     } else {
-      el.textContent = 'Prêt ✓ génération · MP4 → TikTok à la main';
+      el.textContent = 'Prêt ✓ génération · QR iPhone / MP4 → Photos';
       el.style.color = 'var(--a3)';
     }
   } catch {
@@ -775,7 +773,7 @@ function handleWS(msg) {
       if (!S.pubSel.size) initPubSelDefaults();
       renderPublishTargets();
     }
-    notif('🎉','Tous les shorts prêts', S.tiktokApiReady ? (S.shorts.length + ' short(s) · ⚡ Publier ou ⬇ MP4') : (S.shorts.length + ' short(s) · ⬇ Télécharge les MP4 → TikTok'));
+    notif('🎉','Tous les shorts prêts', S.tiktokApiReady ? (S.shorts.length + ' short(s) · ⚡ Publier ou ⬇ MP4') : (S.shorts.length + ' short(s) · QR iPhone ou ⬇ MP4'));
     updateStats();
   }
 
@@ -812,14 +810,13 @@ function appendShortCard(s) {
     </div>
     <a class="sdl" href="${dl}" download target="_blank" rel="noopener">⬇ Télécharger MP4</a>
     <div class="sqr-wrap">
-      <img src="${qrImageSrcForShort(s.file)}" width="120" height="120" alt="QR code vidéo" loading="lazy">
-      <span class="sqr-lbl">Scanne avec ton téléphone → ouvre la vidéo → TikTok <strong>Créer</strong> → <strong>Téléverser</strong></span>
-      <a class="sqr-tt" href="https://www.tiktok.com/upload" target="_blank" rel="noopener">Ouvrir tiktok.com/upload</a>
+      <img src="${qrImageSrcForShort(s.file)}" width="120" height="120" alt="QR pour ouvrir la vidéo sur iPhone" loading="lazy">
+      <span class="sqr-lbl"><strong>iPhone</strong> : ouvre <strong>Appareil photo</strong>, vise ce QR → la vidéo s’ouvre dans Safari → <strong>Télécharger</strong> / icône partage → <strong>Enregistrer la vidéo</strong> (elle apparaît dans <strong>Photos</strong>).</span>
     </div>
     <div class="sinfo"><div class="sdur">⏱ ${fmt(s.duration)} · 1080×1920 H.264</div></div>
     ${S.tiktokApiReady
       ? `<button class="spubbtn" onclick="publishOne(${s.id})">⚡ Publier sur TikTok (API)</button>`
-      : `<div class="spub-hint">📱 Importe ce MP4 dans TikTok : app → <strong>Créer</strong> → <strong>Téléverser</strong>. Pas besoin de connexion ici.</div>`}`;
+      : `<div class="spub-hint">📱 Enregistre la vidéo sur ton iPhone (QR ou ⬇), puis ouvre l’app où tu veux la poster. Pas de connexion requise ici.</div>`}`;
   grid.appendChild(div);
 }
 
@@ -833,7 +830,7 @@ function renderResults() {
 /* ═══ PUBLICATION ═════════════════════════════════════ */
 async function publishOne(id) {
   if (!S.tiktokApiReady) {
-    return notif('📱','Sans API TikTok','Télécharge le MP4 du short puis importe-le dans l’app TikTok (Créer → Téléverser).');
+    return notif('📱','Sans API','Utilise le QR (iPhone) ou ⬇ MP4, enregistre dans Photos, puis partage où tu veux.');
   }
   const short = S.shorts.find(s => s.id === id);
   if (!short) return;
@@ -848,7 +845,7 @@ async function publishOne(id) {
 
 async function publishAll() {
   if (!S.tiktokApiReady) {
-    return notif('📱','Sans API TikTok','Utilise ⬇ Télécharger MP4 sur chaque short, puis importe dans TikTok.');
+    return notif('📱','Sans API','QR ou ⬇ sur chaque short → enregistre sur ton iPhone (Photos).');
   }
   if (!S.shorts.length) return;
   const accIds = getSelectedPublishAccIds();
@@ -966,7 +963,7 @@ function renderPublishTargets() {
   if (!netsWithAcc.length) {
     cont.innerHTML = S.tiktokApiReady
       ? '<div style="font-size:12px;color:var(--t3);padding:6px 0">Aucun compte connecté — ajoute TikTok à droite pour publier via API.</div>'
-      : '<div style="font-size:12px;color:var(--a3);padding:6px 0;line-height:1.45"><strong>Mode simple :</strong> aucun compte requis. Télécharge les MP4 au-dessus puis envoie-les depuis l’app TikTok. La publication automatique (droite) est <em>optionnelle</em> et demande des clés API TikTok.</div>';
+      : '<div style="font-size:12px;color:var(--a3);padding:6px 0;line-height:1.45"><strong>Mode simple :</strong> aucun compte requis. Utilise le <strong>QR</strong> avec l’appareil photo iPhone ou ⬇ MP4 → la vidéo arrive dans <strong>Photos</strong>. La publication auto (droite) est <em>optionnelle</em> (clés API).</div>';
     return;
   }
   const labels = { tt:'🎵 TikTok', ig:'📸 Instagram', fb:'👥 Facebook' };
@@ -1027,7 +1024,7 @@ function openModal(n) {
   if (n === 'tt' && !S.tiktokApiReady) {
     document.getElementById('mSub').textContent = 'Tu n’as rien à connecter pour créer tes shorts.';
     b.innerHTML = `<p style="font-size:13px;color:var(--t2);line-height:1.55;margin:0 0 14px">
-      Génère tes clips puis clique <strong>⬇ Télécharger MP4</strong>. Sur ton téléphone, ouvre TikTok → <strong>Créer</strong> → <strong>Téléverser</strong> et choisis le fichier.<br><br>
+      Génère tes clips puis <strong>scanne le QR</strong> avec l’app <strong>Appareil photo</strong> (iPhone) ou <strong>⬇ Télécharger MP4</strong> — la vidéo se retrouve dans <strong>Photos</strong>.<br><br>
       <span style="color:var(--t3);font-size:12px">La publication <em>directe depuis le site</em> (bouton « Publier API ») est une option avancée : il faut alors des clés sur <strong>developers.tiktok.com</strong> et les mettre dans <code>.env</code> / Render.</span>
     </p>
     <button class="obtn obtn-tt" type="button" onclick="closeModal()" style="width:100%;justify-content:center"><span>✓</span><span class="olbl">Compris</span></button>`;
