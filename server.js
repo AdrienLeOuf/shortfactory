@@ -23,6 +23,7 @@ const FormData       = require('form-data');
 const { v4: uuidv4 } = require('uuid');
 const http           = require('http');
 const WebSocket      = require('ws');
+const QRCode         = require('qrcode');
 
 // ─── App & serveur ────────────────────────────────────────────────────────────
 const app = express();
@@ -204,6 +205,44 @@ app.get('/api/oauth/status', (req, res) => {
 
 app.get('/api/oauth/accounts', (req, res) => {
   res.json({ accounts: Object.entries(tokenStore).map(([id, a]) => ({ id, network: a.network, username: a.username || '', avatar: a.avatar || '' })) });
+});
+
+/** QR code : uniquement pour nos MP4 /output/… (évite abus open-proxy) */
+function qrTargetUrlAllowed(raw, req) {
+  try {
+    const u = new URL(raw);
+    if (!['http:', 'https:'].includes(u.protocol)) return false;
+    if (!/^\/output\/[0-9a-f-]+_short_\d+\.mp4$/i.test(u.pathname)) return false;
+    const want = u.hostname.toLowerCase();
+    const hdr = (req.get('x-forwarded-host') || req.get('host') || '').split(',')[0].trim().toLowerCase();
+    const reqHost = hdr.replace(/:\d+$/, '');
+    if (want === reqHost) return true;
+    if ((want === 'localhost' || want === '127.0.0.1') && (reqHost === 'localhost' || reqHost === '127.0.0.1')) return true;
+    const base = publicBase();
+    if (base) {
+      try {
+        if (new URL(base).hostname.toLowerCase() === want) return true;
+      } catch { /* ignore */ }
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+app.get('/api/qr', async (req, res) => {
+  const raw = String(req.query.url || '').trim();
+  if (!raw || !qrTargetUrlAllowed(raw, req)) {
+    return res.status(400).type('txt').send('URL invalide');
+  }
+  try {
+    const buf = await QRCode.toBuffer(raw, { type: 'png', width: 280, margin: 2, errorCorrectionLevel: 'M' });
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.type('image/png').send(buf);
+  } catch (e) {
+    console.warn('[qr]', e.message);
+    res.status(500).type('txt').send('QR error');
+  }
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
