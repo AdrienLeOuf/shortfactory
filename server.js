@@ -768,7 +768,8 @@ async function doUpload(acc, short) {
 // ═════════════════════════════════════════════════════════════════════════════
 function onListenErr(err) {
   if (err.code === 'EADDRINUSE') {
-    console.error(`\nPort ${PORT} déjà utilisé. Lance avec un autre port : PORT=3001 npm start\n`);
+    console.error(`\nPort ${PORT} déjà utilisé. Ferme l’autre terminal (Ctrl+C) ou tue le process Node sur ce port.\n` +
+      `  Autre port — bash : PORT=3001 npm start   |   PowerShell : $env:PORT=3001; npm run dev\n`);
     process.exit(1);
   }
   throw err;
